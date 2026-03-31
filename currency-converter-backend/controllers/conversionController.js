@@ -41,21 +41,31 @@ exports.convertCurrency = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: "Conversion failed", error: error.message });
     }
-};
+
+    };
+
+
 
 // ========== Get History ==========
 exports.getHistory = async (req, res) => {
     try {
         const { limit = 10, page = 1 } = req.query;
         const skip = (page - 1) * limit;
-
-        const history = await Conversion.find({ isDeleted: false })
+        
+        // Build filter - only show current user's history
+        let filter = { isDeleted: false };
+        
+        if (req.user) {
+            filter.userId = req.user.id;
+        }
+        
+        const history = await Conversion.find(filter)
             .sort({ timestamp: -1 })
             .limit(parseInt(limit))
             .skip(skip);
-
-        const total = await Conversion.countDocuments({ isDeleted: false });
-
+        
+        const total = await Conversion.countDocuments(filter);
+        
         res.json({
             success: true,
             history,
@@ -66,7 +76,11 @@ exports.getHistory = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: "History fetch error", error: error.message });
+        res.status(500).json({ 
+            success: false, 
+            message: "History fetch error", 
+            error: error.message 
+        });
     }
 };
 

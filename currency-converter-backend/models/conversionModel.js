@@ -8,9 +8,14 @@ const conversionSchema = new mongoose.Schema({
     rate: { type: Number, required: true },
     ipAddress: { type: String, default: 'unknown' },
     timestamp: { type: Date, default: Date.now },
+        userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
 
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null }
 });
-
+ 
 module.exports = mongoose.model('Conversion', conversionSchema);
